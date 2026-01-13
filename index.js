@@ -9,11 +9,12 @@ const pLimit = require('p-limit').default;
 const fs = require('fs');
 const path = require('path');
 
-const requestLimit = Number(process.env.REQUEST_LIMIT) || 20;; // Number of concurrent requests
+const requestLimit = Number(process.env.REQUEST_LIMIT) || 10; // Number of concurrent requests
 const mongoDbUrl = process.env.MONGO_DB;
 const pipeline = require('./pipeline');
 const downloadImage = Boolean(process.env.DOWNLOAD_IMAGES);
 const filterData = Boolean(process.env.FILTER_DATA);
+const lastRetrieved = Number(process.env.LAST_RETRIEVED) || 1;
 
 // Ignore SSL certificate errors
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -37,7 +38,6 @@ async function initialize() {
     const res = await fetch('https://phonedbscraper-default-rtdb.firebaseio.com/pdbs-config.json');
     const json = await res.json();
     max = 30;
-    // max = json.max || 10000;
     if (!json.max) {
         console.warn('Warning: Could not fetch max device ID from config, defaulting to 10000');
     } else {
@@ -45,6 +45,20 @@ async function initialize() {
         console.log(`Last update: ${json["last-update"]}`);
     }
 }
+
+const updateEnvLastRetrieved = (id) => {
+    const envPath = path.join(__dirname, '.env');
+    let envContent = fs.readFileSync(envPath, 'utf8');
+
+    if (envContent.includes('LAST_RETRIEVED=')) {
+        envContent = envContent.replace(/LAST_RETRIEVED=\d*/, `LAST_RETRIEVED=${id}`);
+    } else {
+        envContent += `\nLAST_RETRIEVED=${id}`;
+    }
+
+    fs.writeFileSync(envPath, envContent, 'utf8');
+};
+
 
 // Add phone to DB if not exists
 async function addPhone(data) {
@@ -100,6 +114,7 @@ async function scrapePhoneData(id) {
 
         // Save to database
         await addPhone(data);
+        updateEnvLastRetrieved(id);
     } catch (error) {
         console.error(`Error scraping ${id}:`, error.message);
     }
@@ -165,12 +180,11 @@ async function downloadAllImages() {
     console.log("Image download completed.");
 }
 
-
 // Run scraper sequentially
 async function scraperInstance() {
     await initialize();
     const tasks = [];
-    for (let i = 1; i <= max; i++) {
+    for (let i = lastRetrieved; i <= max; i++) {
         tasks.push(
             limit(() => scrapePhoneData(i))
         );
