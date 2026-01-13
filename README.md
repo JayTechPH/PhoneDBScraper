@@ -32,8 +32,8 @@ It supports concurrent scraping, data filtering using aggregation pipelines, and
 Clone the repository:
 
 ```bash
-git clone https://github.com/JayTechPH/phonedb-scraper.git
-cd phonedb-scraper
+git clone https://github.com/JayTechPH/PhoneDBScraper.git
+cd PhoneDBScraper
 ```
 
 Install dependencies:
