@@ -32,7 +32,7 @@ It supports concurrent scraping, data filtering using aggregation pipelines, and
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/phonedb-scraper.git
+git clone https://github.com/JayTechPH/phonedb-scraper.git
 cd phonedb-scraper
 ```
 
@@ -49,7 +49,7 @@ npm install
 Create a `.env` file in the root folder:
 
 ```env
-MONGO_DB=mongodb://localhost:27017/phonedb
+MONGO_DB=mongodb://localhost:27017/phonedb(setup mongo db before using)
 REQUEST_LIMIT=10
 LAST_RETRIEVED=1
 DOWNLOAD_IMAGES=false
