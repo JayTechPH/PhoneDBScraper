@@ -37,7 +37,7 @@ let limit = pLimit(requestLimit);
 async function initialize() {
     const res = await fetch('https://phonedbscraper-default-rtdb.firebaseio.com/pdbs-config.json');
     const json = await res.json();
-    max = 30;
+    max = json.max || 25236;
     if (!json.max) {
         console.warn('Warning: Could not fetch max device ID from config, defaulting to 10000');
     } else {
